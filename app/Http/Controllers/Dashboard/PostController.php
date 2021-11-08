@@ -6,6 +6,8 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostPost;
+use App\Models\Category;
+use App\Models\PostImage;
 
 class PostController extends Controller
 {
@@ -17,7 +19,7 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::orderBy('created_at', 'desc')
-                ->paginate(2);
+            ->paginate(10);
 
         return view('dashboard.post.index')
             ->with(compact('posts'));
@@ -30,7 +32,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('dashboard.post.create');
+        $categories = Category::pluck('id', 'title');
+        return view('dashboard.post.create', ['post' => new Post(), 'categories' => $categories]);
     }
 
     /**
@@ -42,8 +45,7 @@ class PostController extends Controller
     public function store(StorePostPost $request)
     {
 
-        Post::create($request->all());
-
+        Post::create($request->validated());
         return redirect()->back()->with('status', 'Post creado correctamente');
     }
 
@@ -53,9 +55,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
-        //
+        return view('dashboard.post.show')
+            ->with(compact('post'));
     }
 
     /**
@@ -64,9 +67,12 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        //
+        $categories = Category::pluck('id', 'title');
+        return view('dashboard.post.edit')
+            ->with(compact('post'))
+            ->with(compact('categories'));
     }
 
     /**
@@ -76,9 +82,29 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StorePostPost $request, Post $post)
     {
-        //
+        $post->update($request->validated());
+
+        return redirect()->back()->with('status', 'Post actualizado correctamente');
+    }
+
+    public function image( Request $request, Post $post) {
+        
+        $request->validate([
+            'image' => 'required|mimes:jpeg,bmp,png|max:10240'
+        ]);
+
+        $filename = time() . "." . $request->image->extension();
+        $request->image->move(public_path('images'), $filename);
+
+        PostImage::create([
+            'image' => $filename,
+            'post_id' => $post->id
+        ]);
+
+        return back()->with('status', 'Imagen cargada correctamente');
+
     }
 
     /**
@@ -87,8 +113,9 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return back()->with('status', 'Post eliminado correctamente');
     }
 }

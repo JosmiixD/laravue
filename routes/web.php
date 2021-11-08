@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\PostController;
+use App\Http\Controllers\Dashboard\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,5 @@ Route::get('/', function () {
 })->name('home');
 
 Route::resource('dashboard/post', PostController::class);
+Route::post('dashboard/post/{post}/image', [PostController::class, 'image'] )->name('post.image');
+Route::resource('dashboard/category', CategoryController::class);

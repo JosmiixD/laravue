@@ -12,6 +12,16 @@ class Post extends Model
     protected $fillable = [
         'title',
         'url_clean',
-        'content'
+        'content',
+        'category_id',
+        'posted'
     ];
+
+    public function category() {
+        return $this->belongsTo('App\Models\Category');
+    }
+
+    public function image() {
+        return $this->hasOne('App/Models/PostImage');
+    }
 }
