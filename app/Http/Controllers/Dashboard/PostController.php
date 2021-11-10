@@ -11,6 +11,13 @@ use App\Models\PostImage;
 
 class PostController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role.admin']);
+    }
+
+    
     /**
      * Display a listing of the resource.
      *
@@ -72,7 +79,7 @@ class PostController extends Controller
         $categories = Category::pluck('id', 'title');
         return view('dashboard.post.edit')
             ->with(compact('post'))
-            ->with(compact('categories'));
+            ->with(compact('categories')); 
     }
 
     /**
